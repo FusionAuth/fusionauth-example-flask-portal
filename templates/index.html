@@ -2,7 +2,7 @@
 <title>Hello from FusionAuth</title>
 <body>
 
-This is a sample OAuth/Flask application. Log in and edit your profile attributes.
+This is a sample OAuth/Flask application. 
 <br/>
 <br/>
 {% if user %}
@@ -33,7 +33,12 @@ Update your data:
 
   </div>
 {% else %}
-  <a href='/login'>Login</a> | <a href='/register'>Register</a>
+  <div>
+    Log in or register to update your profile.
+  </div>
+  <div>
+    <a href='/login'>Login</a> | <a href='/register'>Register</a>
+  </div>
 {% endif %}
 </body>
 </html>
