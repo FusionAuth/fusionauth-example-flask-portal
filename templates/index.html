@@ -6,6 +6,9 @@ This is a sample OAuth/Flask application.
 <br/>
 <br/>
 {% if user %}
+  <div>
+    <a href='/logout'>Logout</a>
+  </div>
   <h1>Hello {{ user.email }}!</h1>
 
   {% if error %}

@@ -63,6 +63,12 @@ def update():
                return render_template('index.html', user=user, registration_data=registration_data, fields=fields, error=error)
     return redirect('/')
 
+@app.route("/logout", methods=["GET"])
+def logout():
+    session.clear()
+    return redirect(app.config['FA_URL']+'/oauth2/logout?client_id='+app.config['CLIENT_ID'])
+
+
 @app.route("/login", methods=["GET"])
 def login():
     fusionauth = OAuth2Session(app.config['CLIENT_ID'], redirect_uri=app.config['REDIRECT_URI'])
