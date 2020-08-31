@@ -5,7 +5,7 @@ This user portal allows you to read and update a user's registration.data field,
 
 ## Prerequisites
 
-You need to make sure FusionAuth is running and that you have python 3 available. 
+You need to make sure FusionAuth is running and that you have python3/pip3 available. 
 
 ## Setup
 
@@ -15,11 +15,10 @@ You need to make sure FusionAuth is running and that you have python 3 available
 * `pip3 install requests_oauthlib`
 * `pip3 install fusionauth-client`
 * create an application in FusionAuth:
-** Set the redirect url to `http://localhost:5000/callback`
-** Set the logout url to `http://localhost:5000`
-** Enable self service registration
-** Create a form as documented here: https://fusionauth.io/blog/2020/08/27/advanced-registration-form and note the form id
-** Create an API key
+  * Set the redirect url to `http://localhost:5000/callback`
+  * Set the logout url to `http://localhost:5000`
+  * Follow form creation as documented here: https://fusionauth.io/blog/2020/08/27/advanced-registration-form and note the form id
+  * Create an API key
 * `cp samplesettings.py settings.py`
 * Update `settings.py` with your values
 
