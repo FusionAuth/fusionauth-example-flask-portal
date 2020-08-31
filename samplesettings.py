@@ -7,3 +7,4 @@ class Config(object):
     USERINFO_URL='http://localhost:9011/oauth2/userinfo'
     REDIRECT_URI='http://localhost:5000/callback'
     API_KEY='3_g6FQBuatlmxRSITB64FnkliODvtWMuAHxaPB0M3IU'
+    FORM_ID='7a7e08db-5aee-4c28-b5b7-7ec7f7cedf14'
