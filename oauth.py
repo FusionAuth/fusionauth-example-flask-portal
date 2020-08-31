@@ -18,10 +18,11 @@ def homepage():
         user = session['user']
         fusionauth_api_client = FusionAuthClient(app.config['API_KEY'], app.config['FA_URL'])
         user_id = user['sub']
-        client_response = fusionauth_api_client.retrieve_user(user_id)
+        application_id = user['applicationId']
+        client_response = fusionauth_api_client.retrieve_registration(user_id, application_id)
         if client_response.was_successful():
-            print(client_response.success_response['user'])
-            user_data = json.dumps(client_response.success_response['user'].get('data'))
+            print(client_response.success_response)
+            user_data = client_response.success_response['registration'].get('data')
         else:
             print(client_response.error_response)
     return render_template('index.html', user=user, user_data=user_data)
@@ -93,8 +94,6 @@ def callback():
     token = fusionauth.fetch_token(app.config['TOKEN_URL'], client_secret=app.config['CLIENT_SECRET'], authorization_response=request.url)
 
     session['oauth_token'] = token
-    print("token")
-    print(token)
     session['user'] = fusionauth.get(app.config['USERINFO_URL']).json()
 
     return redirect('/')
