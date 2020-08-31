@@ -22,7 +22,7 @@ def homepage():
         application_id = user['applicationId']
         client_response = fusionauth_api_client.retrieve_registration(user_id, application_id)
         if client_response.was_successful():
-            print(client_response.success_response)
+            #print(client_response.success_response)
             registration_data = client_response.success_response['registration'].get('data')
             fields = get_fields(fusionauth_api_client)
         else:
@@ -42,7 +42,7 @@ def update():
 
         client_response = fusionauth_api_client.retrieve_registration(user_id, application_id)
         if client_response.was_successful():
-            print(client_response.success_response)
+            #print(client_response.success_response)
             registration_data = client_response.success_response['registration'].get('data')
             fields = get_fields(fusionauth_api_client)
             for key in fields.keys():
@@ -57,7 +57,7 @@ def update():
             patch_request = { 'registration' : {'applicationId': application_id, 'data' : registration_data }}
             client_response = fusionauth_api_client.patch_registration(user_id, patch_request)
             if client_response.was_successful():
-                print(client_response.success_response)
+                #print(client_response.success_response)
             else:
                error = "Unable to save data"
                return render_template('index.html', user=user, registration_data=registration_data, fields=fields, error=error)
@@ -111,7 +111,7 @@ def get_fields(fusionauth_api_client):
         fields = {}
         client_response = fusionauth_api_client.retrieve_form(app.config['FORM_ID'])
         if client_response.was_successful():
-            print("form")
+            #print("form")
             field_ids = client_response.success_response['form']['steps'][1]['fields']
             for id in field_ids:
                 client_response = fusionauth_api_client.retrieve_form_field(id)
