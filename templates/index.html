@@ -1,0 +1,39 @@
+<!doctype html>
+<title>Hello from FusionAuth</title>
+<body>
+
+This is a sample OAuth/Flask application. Log in and edit your profile attributes.
+<br/>
+<br/>
+{% if user %}
+  <h1>Hello {{ user.email }}!</h1>
+
+  {% if error %}
+    <p style="color:red">Error: {{ error }}</p> 
+  {% endif %}
+  <div>
+  Current data: <br/>
+  {% if user_data %}
+    {% for key in user_data %}
+      {{key}}: {{user_data[key]}}<br/>
+    {% endfor %}
+  {% endif %}
+
+  </div>
+  <div>
+Update your data: 
+
+<form action="/update" method="post">
+  <textarea name="user_data">
+    {{user_data}}
+  </textarea>
+<br/>
+  <input type="submit" value="Update"></input>
+</form>
+
+  </div>
+{% else %}
+  <a href='/login'>Login</a> | <a href='/register'>Register</a>
+{% endif %}
+</body>
+</html>
