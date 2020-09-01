@@ -57,7 +57,7 @@ def update():
             patch_request = { 'registration' : {'applicationId': application_id, 'data' : registration_data }}
             client_response = fusionauth_api_client.patch_registration(user_id, patch_request)
             if client_response.was_successful():
-                #print(client_response.success_response)
+               pass
             else:
                error = "Unable to save data"
                return render_template('index.html', user=user, registration_data=registration_data, fields=fields, error=error)
