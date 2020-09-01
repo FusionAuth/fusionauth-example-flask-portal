@@ -124,7 +124,6 @@ def get_fields(fusionauth_api_client):
 
 if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
-    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "1"
     app.config.from_object('settings.Config')
 
     app.secret_key = os.urandom(24)
