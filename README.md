@@ -3,6 +3,8 @@
 
 This user portal allows you to read and update a user's registration.data field, which is an arbitrary key value store in FusionAuth.
 
+You can read the full blog post here: https://fusionauth.io/blog/2020/09/10/building-profile-portal-with-flask-oauth-apis
+
 ## Prerequisites
 
 You need to make sure FusionAuth is running and that you have python3/pip3 available. 
