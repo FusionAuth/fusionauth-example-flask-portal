@@ -1,11 +1,11 @@
-from authlib.oauth2.client import OAuth2Client
+from authlib.integrations.requests_client import OAuth2Session
+from authlib.oauth2 import OAuth2Client
 from flask import Flask, request, redirect, session, url_for, render_template
 from flask.json import jsonify
 from fusionauth.fusionauth_client import FusionAuthClient
 import pkce
 import json
 import os
-from keystoneclient.session import Session
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -76,12 +76,15 @@ def login():
     code_verifier, code_challenge = pkce.generate_pkce_pair()
 
     session['code_verifier'] = code_verifier
-    sess = Session(code_verifier=code_verifier)
 
     # the first parameter in OAuth2Client requires a session request object
-    fusionauth = OAuth2Client(sess, client_id=app.config['CLIENT_ID'], client_secret=app.config['CLIENT_SECRET'], redirect_uri=app.config['REDIRECT_URI'], code_challenge_method='S256')
-    authorization_url, state = fusionauth.create_authorization_url(app.config['AUTHORIZATION_BASE_URL'], code_verifier=code_verifier)
+    oauth_session = OAuth2Session(app.config['CLIENT_ID'], app.config['CLIENT_SECRET'], None, app.config['TOKEN_URL'], "openid", app.config['REDIRECT_URI'])
+    
+    code_challenge_method = 'S256'
+    fusionauth = OAuth2Client(oauth_session, app.config['CLIENT_ID'], app.config['CLIENT_SECRET'], None, None, "openid", app.config['REDIRECT_URI'], code_challenge_method)
+    authorization_url, state = fusionauth.create_authorization_url(app.config['AUTHORIZATION_BASE_URL'], None, code_verifier)
     print('aman', authorization_url)
+    print('aman', state)
     # State is used to prevent CSRF, keep this for later.
     session['oauth_state'] = state
 
@@ -104,6 +107,8 @@ def register():
 @app.route("/callback", methods=["GET"])
 def callback():
     expected_state = session['oauth_state']
+    
+    #TBD get pkce code challenge?
     state = request.args.get('state','')
     auth_code = request.args.get('code')
     print('header-->', request.headers)
