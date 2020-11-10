@@ -122,8 +122,6 @@ def callback():
     }
 
     fusionauth = OAuth2Session(client_id=app.config['CLIENT_ID'], token=token_dict)
-    # token = fusionauth.fetch_token(app.config['TOKEN_URL'], client_secret=app.config['CLIENT_SECRET'], authorization_response=request.url)
-
     session['oauth_token'] = result['access_token']
     session['user'] = fusionauth.get(app.config['USERINFO_URL']).json()
     return redirect('/')
@@ -132,7 +130,6 @@ def get_fields(fusionauth_api_client):
         fields = {}
         client_response = fusionauth_api_client.retrieve_form(app.config['FORM_ID'])
         if client_response.was_successful():
-            #print("form")
             field_ids = client_response.success_response['form']['steps'][1]['fields']
             for id in field_ids:
                 client_response = fusionauth_api_client.retrieve_form_field(id)
