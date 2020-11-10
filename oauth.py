@@ -81,10 +81,8 @@ def login():
     oauth_session = OAuth2Session(app.config['CLIENT_ID'], app.config['CLIENT_SECRET'], None, app.config['TOKEN_URL'], "openid", app.config['REDIRECT_URI'])
     
     code_challenge_method = 'S256'
-    fusionauth = OAuth2Client(oauth_session, app.config['CLIENT_ID'], app.config['CLIENT_SECRET'], None, None, "openid", app.config['REDIRECT_URI'], code_challenge_method)
-    authorization_url, state = fusionauth.create_authorization_url(app.config['AUTHORIZATION_BASE_URL'], None, code_verifier)
-    print('aman', authorization_url)
-    print('aman', state)
+    fusionauth = OAuth2Client(oauth_session, app.config['CLIENT_ID'], app.config['CLIENT_SECRET'], None, None, "openid", app.config['REDIRECT_URI'])
+    authorization_url, state = fusionauth.create_authorization_url(app.config['AUTHORIZATION_BASE_URL'], None)
     # State is used to prevent CSRF, keep this for later.
     session['oauth_state'] = state
 
@@ -109,19 +107,31 @@ def callback():
     expected_state = session['oauth_state']
     
     #TBD get pkce code challenge?
-    state = request.args.get('state','')
+    state = request.args.get('state', '')
     auth_code = request.args.get('code')
+    print(request.url)
     print('header-->', request.headers)
     print('auth_code-->', request.args.get('code'), 'request_obj-->', request)
     if state != expected_state:
         print("Error, state doesn't match, redirecting without getting token.")
         return redirect('/')
-      
-    fusionauth = OAuth2Client(session, app.config['CLIENT_ID'], client_secret=app.config['CLIENT_SECRET'], redirect_uri=app.config['REDIRECT_URI'])
-    token = fusionauth.fetch_token(app.config['TOKEN_URL'], auth=auth_code, headers=request.headers)
 
+
+    code_challenge_method = 'S256'
+    oauth_session = OAuth2Session(client_id=app.config['CLIENT_ID'], client_secret=app.config['CLIENT_SECRET'], token_endpoint=app.config['TOKEN_URL'], redirect_uri=app.config['REDIRECT_URI'])
+    # token = oauth_session.fetch_token(token_endpoint=app.config['TOKEN_URL'], authorization_response=request.url)
+    fusionauth = OAuth2Client(oauth_session, client_id=app.config['CLIENT_ID'], client_secret=app.config['CLIENT_SECRET'], redirect_uri=app.config['REDIRECT_URI'], token_endpoint_auth_method=None)
+    obj = fusionauth.client_auth_class(
+        client_id=app.config['CLIENT_ID'],
+        client_secret=app.config['CLIENT_SECRET'],
+        auth_method='client_secret_basic',
+    )
+    print("object-->", obj)
+    tup = (app.config['CLIENT_ID'], app.config['CLIENT_SECRET'])
+    token = fusionauth.fetch_token(app.config['TOKEN_URL'], headers=request.headers, auth=tup, grant_type='authorization_code', code=auth_code)
+    print("token-->", token)
     session['oauth_token'] = token
-    session['user'] = fusionauth.get(app.config['USERINFO_URL']).json()
+    # session['user'] = oauth_session.get(app.config['USERINFO_URL']).json()
 
     return redirect('/')
 
