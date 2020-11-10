@@ -1,9 +1,8 @@
 from requests_oauthlib import OAuth2Session
 from flask import Flask, request, redirect, session, url_for, render_template
-from flask.json import jsonify
 from fusionauth.fusionauth_client import FusionAuthClient
-
-import json
+import pkce
+import requests
 import os
 
 app = Flask(__name__)
@@ -22,7 +21,6 @@ def homepage():
         application_id = user['applicationId']
         client_response = fusionauth_api_client.retrieve_registration(user_id, application_id)
         if client_response.was_successful():
-            #print(client_response.success_response)
             registration_data = client_response.success_response['registration'].get('data')
             fields = get_fields(fusionauth_api_client)
         else:
@@ -71,40 +69,63 @@ def logout():
 
 @app.route("/login", methods=["GET"])
 def login():
+    code_verifier, code_challenge = pkce.generate_pkce_pair()
     fusionauth = OAuth2Session(app.config['CLIENT_ID'], redirect_uri=app.config['REDIRECT_URI'])
     authorization_url, state = fusionauth.authorization_url(app.config['AUTHORIZATION_BASE_URL'])
     # State is used to prevent CSRF, keep this for later.
     session['oauth_state'] = state
 
-    return redirect(authorization_url)
+    # save the verifier in session to send it later to the token endpoint
+    session['code_verifier'] = code_verifier
+    return redirect(authorization_url+'&code_challenge='+code_challenge+'&code_challenge_method=S256')
 
 @app.route("/register", methods=["GET"])
 def register():
+    code_verifier, code_challenge = pkce.generate_pkce_pair()
     fusionauth = OAuth2Session(app.config['CLIENT_ID'], redirect_uri=app.config['REDIRECT_URI'])
     authorization_url, state = fusionauth.authorization_url(app.config['AUTHORIZATION_BASE_URL'])
 
     # registration lives under non standard url, but otherwise takes exactly the same parameters
-    registration_url = authorization_url.replace("authorize","register", 1)
+    registration_url = authorization_url.replace("authorize", "register", 1)
 
     # State is used to prevent CSRF, keep this for later.
     session['oauth_state'] = state
-
-    return redirect(registration_url)
+    # save the verifier in session to send it later to the token endpoint
+    session['code_verifier'] = code_verifier
+    return redirect(registration_url+'&code_challenge='+code_challenge+'&code_challenge_method=S256')
 
 @app.route("/callback", methods=["GET"])
 def callback():
     expected_state = session['oauth_state']
     state = request.args.get('state','')
+    auth_code = request.args.get('code','')
     if state != expected_state:
         print("Error, state doesn't match, redirecting without getting token.")
         return redirect('/')
-      
-    fusionauth = OAuth2Session(app.config['CLIENT_ID'], redirect_uri=app.config['REDIRECT_URI'])
-    token = fusionauth.fetch_token(app.config['TOKEN_URL'], client_secret=app.config['CLIENT_SECRET'], authorization_response=request.url)
 
-    session['oauth_token'] = token
+    # call token endpoint url
+    resp = requests.post(
+        url=app.config['TOKEN_URL'],
+        data={
+            'grant_type': 'authorization_code',
+            'client_id': app.config['CLIENT_ID'],
+            'client_secret': app.config['CLIENT_SECRET'],
+            'redirect_uri': app.config['REDIRECT_URI'],
+            'code': auth_code,
+            'code_verifier': session['code_verifier']
+        }
+    )
+    result = resp.json()
+    token_dict = {
+        'access_token': result['access_token'],
+        'token_type': 'bearer'
+    }
+
+    fusionauth = OAuth2Session(client_id=app.config['CLIENT_ID'], token=token_dict)
+    # token = fusionauth.fetch_token(app.config['TOKEN_URL'], client_secret=app.config['CLIENT_SECRET'], authorization_response=request.url)
+
+    session['oauth_token'] = result['access_token']
     session['user'] = fusionauth.get(app.config['USERINFO_URL']).json()
-
     return redirect('/')
 
 def get_fields(fusionauth_api_client):
