@@ -27,7 +27,7 @@ def homepage():
             fields = get_fields(fusionauth_api_client)
         else:
             print(client_response.error_response)
-    return render_template('index.html', user=user, registration_data=registration_data, fields=fields)
+    return render_template('index-interview.html', user=user, registration_data=registration_data, fields=fields)
 
 @app.route("/update", methods=["POST"])
 def update():
@@ -60,7 +60,7 @@ def update():
                pass
             else:
                error = "Unable to save data"
-               return render_template('index.html', user=user, registration_data=registration_data, fields=fields, error=error)
+               return render_template('index-interview.html', user=user, registration_data=registration_data, fields=fields, error=error)
     return redirect('/')
 
 @app.route("/logout", methods=["GET"])

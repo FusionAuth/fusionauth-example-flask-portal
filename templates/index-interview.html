@@ -1,0 +1,56 @@
+<!doctype html>
+<title>Hello from FusionAuth</title>
+<body>
+
+This is a sample OAuth/Flask application. 
+<br/>
+<br/>
+{% if user %}
+  <div>
+    <a href='/logout'>Logout</a>
+  </div>
+  <h1>Hello {{ user.email }}!</h1>
+
+  {% if error %}
+    <p style="color:red">Error: {{ error }}</p> 
+  {% endif %}
+  <div>
+  <h3>Current preferences</h3>
+  {% if registration_data %}  
+    {% for key in registration_data.keys() %}
+      <p>
+      {% if key == 'favoritecolor' and registration_data['favoritecolor'] | length > 0 %}
+        Favorite Color: {{registration_data['favoritecolor']}}
+      {% endif %}
+      </p>
+    {% endfor %}
+  {% endif %}
+
+  </div>
+  <div>
+  <h3>Update your preferences</h3>
+
+<form action="/update" method="post">
+  {% if registration_data %}  
+    {% for key in registration_data.keys() %}
+      <p>
+      {% if key == 'favoritecolor' %}
+        Favorite Color: <input type='{{fields['registration.data.'+key].control}}' {% if fields['registration.data.'+key].required %}required{% endif %} name='{{key}}' value='{{registration_data['favoritecolor']}}' />
+      {% endif %}
+      </p>
+    {% endfor %}
+  {% endif %}
+  <input type="submit" value="Update"></input>
+</form>
+
+  </div>
+{% else %}
+  <div>
+    Log in or register to update your profile.
+  </div>
+  <div>
+    <a href='/login'>Login</a> | <a href='/register'>Register</a>
+  </div>
+{% endif %}
+</body>
+</html>
